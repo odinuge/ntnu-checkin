@@ -126,27 +126,43 @@ func main() {
 	case "checkin":
 		mySet := flag.NewFlagSet("", flag.ExitOnError)
 		var roomFlag = mySet.String("room", "", "Room ID to checkin (example 1234)")
-		var startTimestamp = mySet.String("from", "", "Start timestamp (example 07:00)")
-		var endTimestamp = mySet.String("to", "", "End timestamp (example 23:00)")
+		var startTimestamp = mySet.String("from", "", `Start timestamp (example "07:00" or "2020-10-30T11:21:55.423451+02:00")`)
+		var endTimestamp = mySet.String("to", "", `End timestamp (example "23:00" or "2020-10-30T11:21:55.423451+02:00"`)
 
 		mySet.Parse(os.Args[2:])
 
 		if *roomFlag == "" || *endTimestamp == "" || *startTimestamp == "" {
 			fmt.Printf("Usage of %s %s:\n", os.Args[0], os.Args[1])
 			mySet.PrintDefaults()
-			return
+			os.Exit(1)
 		}
 
 		now := time.Now()
-		startSplitted := strings.Split(*startTimestamp, ":")
-		startHour, err := strconv.Atoi(startSplitted[0])
-		startMinute, err := strconv.Atoi(startSplitted[1])
-		from := time.Date(now.Year(), now.Month(), now.Day(), startHour, startMinute, 0, 0, now.Location())
 
-		toSplitted := strings.Split(*endTimestamp, ":")
-		endHour, err := strconv.Atoi(toSplitted[0])
-		endMinute, err := strconv.Atoi(toSplitted[1])
-		to := time.Date(now.Year(), now.Month(), now.Day(), endHour, endMinute, 0, 0, now.Location())
+		from, err := time.Parse(time.RFC3339, *startTimestamp)
+
+		if err != nil {
+			startSplitted := strings.Split(*startTimestamp, ":")
+			startHour, err2 := strconv.Atoi(startSplitted[0])
+			startMinute, err3 := strconv.Atoi(startSplitted[1])
+			from = time.Date(now.Year(), now.Month(), now.Day(), startHour, startMinute, 0, 0, now.Location())
+
+			if err2 != nil || err3 != nil {
+				log.Fatalf("Unable to parse timestamp %q: %e", *startTimestamp, err)
+			}
+		}
+		to, err := time.Parse(time.RFC3339, *endTimestamp)
+
+		if err != nil {
+			toSplitted := strings.Split(*endTimestamp, ":")
+			endHour, err2 := strconv.Atoi(toSplitted[0])
+			endMinute, err3 := strconv.Atoi(toSplitted[1])
+			to = time.Date(now.Year(), now.Month(), now.Day(), endHour, endMinute, 0, 0, now.Location())
+
+			if err2 != nil || err3 != nil {
+				log.Fatalf("Unable to parse timestamp %q: %e", *startTimestamp, err)
+			}
+		}
 
 		var resp *http.Response
 		if resp, err = client.Get("https://innsida.ntnu.no/checkin/api/room/" + url.QueryEscape(*roomFlag)); err != nil {
