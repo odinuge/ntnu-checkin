@@ -7,7 +7,7 @@
 (I do however think it is better that people check in via the CLI instead of _not_ doing it..)
 
 
-```
+```bash
 $ go get github.com/odinuge/ntnu-checkin
 $ export FEIDE_USERNAME=user
 $ export FEIDE_PASSWORD=pass
@@ -27,7 +27,6 @@ ROOM-ID    NAME
 
 $ ntnu-checkin checkin --room=14894 --from=07:00 --to=18:00
 Checked in to EL5 Gamle elektro Gløshaugen from 07:00 to 18:00: OK
-
 ```
 
 ## TODO
