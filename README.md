@@ -44,7 +44,7 @@ Usage of ntnu-checkin:
   ntnu-checkin get
     to list checkins
   ntnu-checkin delete [chckin-id]
-    to list checkins
+    to delete checkins
 ```
 
 ## TODO

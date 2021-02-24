@@ -40,7 +40,7 @@ func main() {
   %s list
     to list checkins
   %s delete [chckin-id]
-    to list checkins
+    to delete checkins
 `, os.Args[0], os.Args[0], os.Args[0], os.Args[0], os.Args[0], os.Args[0])
 		os.Exit(1)
 	}
