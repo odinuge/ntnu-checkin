@@ -31,9 +31,17 @@ func main() {
 	}
 	help := func() {
 		fmt.Printf(`Usage of %s:
-  %s checkin - to checkin
-  %s search - to search for rooms
-`, os.Args[0], os.Args[0], os.Args[0])
+  %s checkin --room=<room-id> --from=07:00 --to=23:00
+    to checkin
+  %s search [query]
+    to search for rooms
+  %s get
+    to list checkins
+  %s list
+    to list checkins
+  %s delete [chckin-id]
+    to list checkins
+`, os.Args[0], os.Args[0], os.Args[0], os.Args[0], os.Args[0], os.Args[0])
 		os.Exit(1)
 	}
 
@@ -216,6 +224,56 @@ func main() {
 			os.Exit(1)
 		}
 
+	case "delete":
+		if len(os.Args) < 3 {
+			fmt.Printf("Missing id to delete.\n")
+			os.Exit(1)
+		}
+		id := os.Args[2]
+
+		req, err := http.NewRequest("DELETE", "https://innsida.ntnu.no/checkin/api/checkin/"+id, nil)
+		var deleteResp *http.Response
+		if deleteResp, err = client.Do(req); err != nil {
+			log.Fatal(err)
+		}
+
+		defer deleteResp.Body.Close()
+		apiRes, _ := ioutil.ReadAll(deleteResp.Body)
+		fmt.Printf("Deleted checkin %s: %s\n", id, apiRes)
+
+		if string(apiRes) != "Checkin deleted." {
+			fmt.Printf(`Status from NTNU checkin is not "Checkin deleted.", so go to https://innsida.ntnu.no/checkin/mycheckins to check: %s\n`, apiRes)
+			os.Exit(1)
+		}
+
+	case "list":
+		fallthrough
+	case "get":
+		var listResp *http.Response
+		if listResp, err = client.Get("https://innsida.ntnu.no/checkin/api/checkinhistory?start=0&end=2000000000000"); err != nil {
+			log.Fatal(err)
+		}
+		var listData []struct {
+			ID           string    `json:"_id"`
+			Location     string    `json:"location"`
+			LocationName string    `json:"locationName"`
+			StartTime    time.Time `json:"startTime"`
+			EndTime      time.Time `json:"endTime"`
+			SeatNr       string    `json:"seatNr"`
+			User         string    `json:"user"`
+			CreatedAt    time.Time `json:"createdAt"`
+			UpdatedAt    time.Time `json:"updatedAt"`
+			V            int       `json:"__v"`
+		}
+		defer listResp.Body.Close()
+		str9, _ := ioutil.ReadAll(listResp.Body)
+		_ = json.Unmarshal(str9, &listData)
+		fmt.Printf("CHECKIN-ID                START              END                ROOM-ID      LOCATION\n")
+
+		now := time.Now()
+		for _, checkin := range listData {
+			fmt.Printf("%-25s %-18s %-18s %-12s %s\n", checkin.ID, checkin.StartTime.In(now.Location()).Format("Mon Jan _2 15:04"), checkin.EndTime.In(now.Location()).Format("Mon Jan _2 15:04"), checkin.Location, checkin.LocationName)
+		}
 	case "search":
 		var resp9 *http.Response
 		if resp9, err = client.Get("https://innsida.ntnu.no/checkin/api/search?query=" + url.QueryEscape(strings.Join(os.Args[2:], " "))); err != nil {

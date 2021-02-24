@@ -27,6 +27,24 @@ ROOM-ID    NAME
 
 $ ntnu-checkin checkin --room=14894 --from=07:00 --to=18:00
 Checked in to EL5 Gamle elektro Gløshaugen from 07:00 to 18:00: OK
+
+$ ntnu-checkin get
+CHECKIN-ID                START              END                ROOM-ID      LOCATION
+6035fec4c2a0412c2336fe92  Wed Feb 24 07:00   Wed Feb 24 18:00   14894        EL6 Gamle elektro Gløshaugen
+
+$ ntnu-checkin delete 6035fec4c2a0412c2336fe92
+Deleted checkin 6035fec4c2a0412c2336fe92: Checkin deleted.
+
+$ ntnu-checkin
+Usage of ntnu-checkin:
+  ntnu-checkin checkin --room=<room-id> --from=07:00 --to=23:00
+    to checkin
+  ntnu-checkin search [query]
+    to search for rooms
+  ntnu-checkin get
+    to list checkins
+  ntnu-checkin delete [chckin-id]
+    to list checkins
 ```
 
 ## TODO
