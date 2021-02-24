@@ -51,5 +51,3 @@ Usage of ntnu-checkin:
 - (Better) Error handling
 - Don't auth each time (works for now)
 - Don't auth before printing usage
-- List checkins
-- Delete checkins
